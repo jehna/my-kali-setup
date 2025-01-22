@@ -1,0 +1,7 @@
+.sessions
+*.ovpn
+*.deb
+rustscan/target
+kali-dpkg-packages/rustscan/usr/bin/rustscan
+kali-dpkg-packages/nessus
+labs

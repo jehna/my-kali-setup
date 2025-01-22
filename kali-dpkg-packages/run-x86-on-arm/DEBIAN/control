@@ -1,0 +1,7 @@
+Package: run-x86-on-arm
+Version: 1.0-1
+Priority: optional
+Architecture: all
+Depends: qemu-user-static, binfmt-support
+Maintainer: Jesse Luoto <jesse.luoto@gmail.com>
+Description: Enables running x86 binaries on arm64

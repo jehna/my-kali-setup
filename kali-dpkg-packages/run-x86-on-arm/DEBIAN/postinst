@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# https://www.kali.org/docs/arm/x86-on-arm/
+sudo dpkg --add-architecture amd64
+sudo apt update

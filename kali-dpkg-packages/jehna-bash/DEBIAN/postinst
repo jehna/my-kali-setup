@@ -1,0 +1,7 @@
+#!/bin/bash
+
+USER=$(logname)
+
+if ! grep -q 'PS1="👹$PS1"' /home/$USER/.bashrc; then
+    echo 'PS1="👹$PS1"' >> /home/$USER/.bashrc
+fi

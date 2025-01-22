@@ -1,0 +1,13 @@
+ #!/bin/bash
+
+set -e
+
+ROCKYOU_GZ="/usr/share/wordlists/rockyou.txt.gz"
+ROCKYOU_TXT="/usr/share/wordlists/rockyou.txt"
+
+if [ -f "$ROCKYOU_GZ" ]; then
+    gunzip -c "$ROCKYOU_GZ" > "$ROCKYOU_TXT"
+    rm "$ROCKYOU_GZ"
+fi
+
+exit 0

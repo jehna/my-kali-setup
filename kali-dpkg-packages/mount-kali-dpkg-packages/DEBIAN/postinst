@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+
+# Enable and start the mount-kali-dpkg-packages service
+systemctl enable mount-kali-dpkg-packages.service
+systemctl start mount-kali-dpkg-packages.service

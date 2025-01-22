@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+# Path to the image
+IMAGE_PATH="/usr/share/backgrounds/kali-metal-dark-small.png"
+
+export DISPLAY=:0
+
+# Set the XFCE desktop background
+USER=$(logname)
+
+sudo -u "$USER" xfconf-query -c xfce4-desktop -p "/backdrop/screen0/monitorVirtual-1/workspace0/last-image" -s "$IMAGE_PATH"
+sudo -u "$USER" xfconf-query -c xfce4-desktop -p "/backdrop/screen0/monitorVirtual-1/workspace1/last-image" -s "$IMAGE_PATH"
+sudo -u "$USER" xfconf-query -c xfce4-desktop -p "/backdrop/screen0/monitorVirtual-1/workspace2/last-image" -s "$IMAGE_PATH"
+sudo -u "$USER" xfconf-query -c xfce4-desktop -p "/backdrop/screen0/monitorVirtual-1/workspace3/last-image" -s "$IMAGE_PATH"
+sudo -u "$USER" xfdesktop &

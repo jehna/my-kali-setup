@@ -1,0 +1,8 @@
+Package: jehna-ssh
+Version: 1.0-1
+Section: metapackages
+Priority: optional
+Architecture: all
+Depends: openssh-server
+Maintainer: Jesse Luoto <jesse.luoto@gmail.com>
+Description: Enables SSH service on the VM

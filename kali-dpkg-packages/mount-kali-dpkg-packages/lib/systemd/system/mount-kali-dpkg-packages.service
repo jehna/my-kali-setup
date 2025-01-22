@@ -1,0 +1,13 @@
+[Unit]
+Description=Mount kali-dpkg-packages Directory
+After=network.target
+User=root
+Group=root
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /usr/bin/mount-kali-dpkg-packages.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

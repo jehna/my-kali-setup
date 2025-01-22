@@ -1,0 +1,7 @@
+Package: rockyou-decompressor
+Version: 1.0
+Section: utils
+Priority: optional
+Architecture: all
+Maintainer: Jesse Luoto <jesse.luoto@gmail.com>
+Description: A package to decompress rockyou.txt.gz if found

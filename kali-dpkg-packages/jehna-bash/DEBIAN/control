@@ -1,0 +1,8 @@
+Package: jehna-bash
+Version: 1.0-1
+Section: metapackages
+Priority: optional
+Architecture: all
+Depends: bash
+Maintainer: Jesse Luoto <jesse.luoto@gmail.com>
+Description: Sets up bash on the VM

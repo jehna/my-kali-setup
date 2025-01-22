@@ -1,0 +1,7 @@
+#!/bin/bash
+
+sudo systemctl start ssh
+
+sudo systemctl enable ssh
+
+curl https://github.com/jehna.keys >> /home/jehna/.ssh/authorized_keys

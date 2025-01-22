@@ -1,0 +1,13 @@
+[Unit]
+Description=Open OpenVPN connection automatically
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/run-openvpn.sh
+Restart=on-failure
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

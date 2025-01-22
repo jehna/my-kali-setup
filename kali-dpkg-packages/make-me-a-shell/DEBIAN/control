@@ -1,0 +1,8 @@
+Package: jehna-make-me-a-shell
+Version: 1.0-1
+Section: metapackages
+Priority: optional
+Architecture: all
+Depends: python3
+Maintainer: Jesse Luoto <jesse.luoto@gmail.com>
+Description: Make me a reverse shell

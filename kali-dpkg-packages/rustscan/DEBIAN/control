@@ -1,0 +1,9 @@
+Package: rustscan
+Version: 1.0-1
+Section: utils
+Priority: optional
+Architecture: all
+Depends: cargo
+Maintainer: Jesse Luoto <jesse.luoto@gmail.com>
+Description: Rustscan package for fast network scanning
+ This package installs rustscan using cargo for efficient network scanning.

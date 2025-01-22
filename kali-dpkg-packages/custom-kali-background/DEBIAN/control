@@ -1,0 +1,8 @@
+Package: custom-kali-background
+Version: 1.0-1
+Section: graphics
+Priority: optional
+Architecture: all
+Maintainer: Jesse Luoto <jesse.luoto@gmail.com>
+Description: Custom Kali background image
+ This package installs a custom background image and sets it as the XFCE desktop background.

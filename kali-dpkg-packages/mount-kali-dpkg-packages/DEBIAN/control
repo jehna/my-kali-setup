@@ -1,0 +1,7 @@
+Package: mount-kali-dpkg-packages
+Version: 1.0-1
+Section: base
+Priority: optional
+Architecture: all
+Maintainer: Jesse Luoto <jesse.luoto@gmail.com>
+Description: A simple service to mount kali-dpkg-packages directory from host machine on startup

@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+
+# Enable and start the openvpn service
+systemctl enable auto-vpn.service
+systemctl start auto-vpn.service
