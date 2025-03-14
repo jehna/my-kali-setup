@@ -1,8 +1,9 @@
 # My Kali setup
+> A collection of tools that make using Kali linux better
 
-## Setup
-
-Download VPN config to kali-dpkg-packages/universal.ovpn
+This repository contains packages that help me configure my Kali Linux setup and
+to run in in an immutable container. It runs on VMWare fusion by creating a
+session that's discarded on logout.
 
 ## Install
 
@@ -19,3 +20,11 @@ Start the VM in immutable mode with `./start.sh`.
 
 Start the VM in mutable mode with `./update.sh`.
 
+SSH to the container with `./ssh.sh`
+
+## Config
+
+### auto-vpn
+
+Download your VPN config to `kali-dpkg-packages/universal.ovpn`. The VPN is
+connected automatically when the machine boots.
