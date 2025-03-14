@@ -1,3 +1,5 @@
+<div align="center"><img src="https://github.com/jehna/my-kali-setup/blob/main/logo.png?raw=true" width="200" height="200"></div>
+
 # My Kali setup
 > A collection of tools that make using Kali linux better
 
