@@ -36,6 +36,10 @@
 -A ufw-before-output -p tcp -d http.kali.org --dport 443 -j ACCEPT
 -A ufw-before-output -p tcp -d archive.kali.org --dport 80 -j ACCEPT
 -A ufw-before-output -p tcp -d archive.kali.org --dport 443 -j ACCEPT
+-A ufw-before-output -p tcp -d kali.download --dport 80 -j ACCEPT
+-A ufw-before-output -p tcp -d kali.download --dport 443 -j ACCEPT
+-A ufw-before-output -p tcp -d mirror.accum.se --dport 80 -j ACCEPT
+-A ufw-before-output -p tcp -d mirror.accum.se --dport 443 -j ACCEPT
 
 # Allow all traffic from host machine (192.168.213.1)
 -A ufw-before-input -s 192.168.213.1 -j ACCEPT
