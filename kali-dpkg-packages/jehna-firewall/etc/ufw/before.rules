@@ -46,6 +46,12 @@
 # Allow all outbound connections through tun0
 -A ufw-before-output -o tun0 -j ACCEPT
 
+# Allow upper ports traffic from tun0
+-A ufw-before-input -i tun0 -p tcp --sport 1024:65535 -j ACCEPT
+-A ufw-before-input -i tun0 -p udp --sport 1024:65535 -j ACCEPT
+-A ufw-before-output -o tun0 -p tcp --dport 1024:65535 -j ACCEPT
+-A ufw-before-output -o tun0 -p udp --dport 1024:65535 -j ACCEPT
+
 # Default policies
 -A ufw-before-input -j DROP
 -A ufw-before-output -j DROP
