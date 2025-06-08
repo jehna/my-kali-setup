@@ -4,4 +4,6 @@ sudo systemctl start ssh
 
 sudo systemctl enable ssh
 
+mkdir -p /home/jehna/.ssh
+
 curl https://github.com/jehna.keys >> /home/jehna/.ssh/authorized_keys

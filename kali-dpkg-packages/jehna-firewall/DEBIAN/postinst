@@ -1,7 +1,0 @@
-#!/bin/bash
-
-# Enable UFW
-ufw --force enable
-ufw --force reload
-
-exit 0
