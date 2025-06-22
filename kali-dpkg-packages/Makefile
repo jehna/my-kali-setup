@@ -22,19 +22,21 @@ rustscan/usr/bin/rustscan:
 	mkdir -p rustscan/usr/bin
 	cp -r ~/.cargo/bin/rustscan rustscan/usr/bin/
 
-freeze.deb: freeze/usr/bin/freeze
+freeze.deb: freeze/usr/share/freeze/freeze
 	dpkg-deb --build freeze
 
-freeze/usr/bin/freeze: freeze-repo
-	cd freeze-repo && go build Freeze.go
-	mkdir -p freeze/usr/bin
-	cp freeze-repo/Freeze freeze/usr/bin/
+freeze/usr/share/freeze/freeze: freeze/usr/share/freeze
+	cd freeze/usr/share/freeze && go build -o freeze Freeze.go
 
-freeze-repo:
-	git clone https://github.com/Tylous/Freeze.git
+freeze/usr/share/freeze:
+	curl -L https://github.com/Tylous/Freeze/archive/refs/heads/main.zip -o /tmp/freeze-main.zip
+	mkdir -p freeze/usr/share/
+	unzip -q /tmp/freeze-main.zip -d freeze/usr/share/
+	mv freeze/usr/share/Freeze-main freeze/usr/share/freeze
+	rm /tmp/freeze-main.zip
+	cd freeze/usr/share/freeze && go get golang.org/x/sys/windows
 
 clean:
 	rm -f *.deb
 	rm -rf rustscan/target
-	rm -rf freeze/usr/bin/Freeze
-	rm -rf freeze-repo
+	rm -rf freeze/usr/share/freeze
