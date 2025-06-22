@@ -22,8 +22,19 @@ rustscan/usr/bin/rustscan:
 	mkdir -p rustscan/usr/bin
 	cp -r ~/.cargo/bin/rustscan rustscan/usr/bin/
 
+freeze.deb: freeze/usr/bin/freeze
+	dpkg-deb --build freeze
 
+freeze/usr/bin/freeze: freeze-repo
+	cd freeze-repo && go build Freeze.go
+	mkdir -p freeze/usr/bin
+	cp freeze-repo/Freeze freeze/usr/bin/
+
+freeze-repo:
+	git clone https://github.com/Tylous/Freeze.git
 
 clean:
 	rm -f *.deb
 	rm -rf rustscan/target
+	rm -rf freeze/usr/bin/Freeze
+	rm -rf freeze-repo

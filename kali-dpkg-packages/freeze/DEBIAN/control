@@ -1,0 +1,8 @@
+Package: freeze
+Version: 1.0-1
+Section: base
+Priority: optional
+Architecture: all
+Depends: mount-kali-dpkg-packages
+Maintainer: Jesse Luoto <jesse.luoto@gmail.com>
+Description: Freeze is a payload toolkit for bypassing EDRs using suspended processes, direct syscalls, and alternative execution methods
