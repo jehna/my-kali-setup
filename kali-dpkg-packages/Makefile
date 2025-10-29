@@ -36,6 +36,13 @@ freeze/usr/share/freeze:
 	rm /tmp/freeze-main.zip
 	cd freeze/usr/share/freeze && go get golang.org/x/sys/windows
 
+make-me-a-shell.deb: make-me-a-shell/usr/share/make-me-a-shell/Invoke-ConPtyShell.ps1
+	dpkg-deb --build make-me-a-shell
+
+make-me-a-shell/usr/share/make-me-a-shell/Invoke-ConPtyShell.ps1:
+	mkdir -p make-me-a-shell/usr/share/make-me-a-shell
+	curl -L https://raw.githubusercontent.com/antonioCoco/ConPtyShell/master/Invoke-ConPtyShell.ps1 -o make-me-a-shell/usr/share/make-me-a-shell/Invoke-ConPtyShell.ps1
+
 clean:
 	rm -f *.deb
 	rm -rf rustscan/target
