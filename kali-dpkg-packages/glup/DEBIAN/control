@@ -1,0 +1,8 @@
+Package: glup
+Version: 1.0-1
+Section: metapackages
+Priority: optional
+Architecture: all
+Depends: python3
+Maintainer: Jesse Luoto <jesse.luoto@gmail.com>
+Description: Glup a file from a remote server using HTTP
