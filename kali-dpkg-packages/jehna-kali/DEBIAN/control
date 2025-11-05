@@ -3,7 +3,7 @@ Version: 1.0-1
 Section: metapackages
 Priority: optional
 Architecture: all
-Depends: gimp, seclists, gobuster, burpsuite, inspectrum
+Depends: gimp, seclists, gobuster, burpsuite, inspectrum, bloodhound, neo4j, sharphound
 Maintainer: Jesse Luoto <jesse.luoto@gmail.com>
 Description: Metapackage for additional tools I like to have on my Kali VM
  This metapackage installs additional tools so I can feel comfortable on my machine.
