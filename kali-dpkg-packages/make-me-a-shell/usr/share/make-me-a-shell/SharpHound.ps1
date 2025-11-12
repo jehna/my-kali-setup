@@ -1,0 +1,1 @@
+/usr/share/sharphound/SharpHound.ps1

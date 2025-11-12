@@ -1,0 +1,1 @@
+/usr/share/peass/winpeas/winPEAS.ps1
