@@ -192,6 +192,7 @@ def main():
     parser.add_argument('-P', '--http-server-port', type=int, default=0, help='Port number to use for the HTTP server, use 0 for random port')
     parser.add_argument('-o', '--os', choices=['linux', 'windows'], default='linux', help='Operating system to use for the reverse shell')
     parser.add_argument('-e', '--encode', choices=['base64', 'url', 'none'], default='none', help='Encode the reverse shell command')
+    parser.add_argument('--ip', help='The IP address if you need to connect from behind a proxy (use same ports)')
 
     args = parser.parse_args()
 
@@ -201,7 +202,15 @@ def main():
     if args.http_server_port == 0:
         args.http_server_port = get_random_port()
 
-    ip = get_ip_address(args.interface)
+    local_ip = get_ip_address(args.interface)
+    if args.ip:
+        print(f"Create a proxy through {args.ip} for the reverse shell ports")
+        print(f"e.g.:")
+        print(f"ssh -N -L 0.0.0.0:{args.port}:{local_ip}:{args.port} -L 0.0.0.0:{args.http_server_port}:{local_ip}:{args.http_server_port} jehna@{local_ip}")
+        ip = args.ip
+    else:
+        ip = local_ip
+
     create_reverse_shell(ip, args.port, args.os, args.encode, args.http_server_port, args.auto_upgrade)
     listen_for_connection(args.port, args.os, args.http_server_port, ip, args.auto_upgrade)
 
