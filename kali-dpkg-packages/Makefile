@@ -43,6 +43,15 @@ make-me-a-shell/usr/share/make-me-a-shell/Invoke-ConPtyShell.ps1:
 	mkdir -p make-me-a-shell/usr/share/make-me-a-shell
 	curl -L https://raw.githubusercontent.com/antonioCoco/ConPtyShell/master/Invoke-ConPtyShell.ps1 -o make-me-a-shell/usr/share/make-me-a-shell/Invoke-ConPtyShell.ps1
 
+jehna-ligolo.deb: jehna-ligolo/usr/share/make-me-a-shell/ligolo.exe
+	dpkg-deb --build jehna-ligolo
+
+jehna-ligolo/usr/share/make-me-a-shell/ligolo.exe:
+	mkdir -p jehna-ligolo/usr/share/make-me-a-shell
+	curl -L https://github.com/nicocha30/ligolo-ng/releases/download/v0.8.2/ligolo-ng_agent_0.8.2_windows_amd64.zip -o /tmp/ligolo-ng_agent_0.8.2_windows_amd64.zip
+	unzip -q /tmp/ligolo-ng_agent_0.8.2_windows_amd64.zip -d /tmp/ligolo-agent
+	mv /tmp/ligolo-agent/agent.exe jehna-ligolo/usr/share/make-me-a-shell/ligolo.exe
+
 clean:
 	rm -f *.deb
 	rm -rf rustscan/target

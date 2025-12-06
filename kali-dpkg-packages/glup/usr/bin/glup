@@ -85,7 +85,7 @@ def start_server(ip, port):
             print("Server started!")
             print(f"Use the following URL to glup a file:")
             print(f"curl -X POST --data-binary @file.txt http://{ip}:{port}/")
-            print(f"Invoke-WebRequest -uri http://${ip}:${port}/ -Method Post -InFile file.txt")
+            print(f"Invoke-WebRequest -Uri http://{ip}:{port}/ -Method Post -InFile file.txt")
             print("Press Ctrl+C to stop the server\n")
             httpd.serve_forever()
     except KeyboardInterrupt:

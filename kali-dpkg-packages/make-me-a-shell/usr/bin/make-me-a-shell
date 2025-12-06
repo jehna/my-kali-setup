@@ -51,7 +51,7 @@ class ConnectionLogger:
     """
     def __init__(self, connected_ip):
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-        self.logfile_name = f"{connected_ip}-{timestamp}.txt"
+        self.logfile_name = f"{timestamp}-{connected_ip}.ansi"
         self.logfile = open(self.logfile_name, 'w', encoding='utf-8')
         print(f"Logging to {self.logfile_name}")
 
@@ -207,6 +207,8 @@ def main():
         print(f"Create a proxy through {args.ip} for the reverse shell ports")
         print(f"e.g.:")
         print(f"ssh -N -L 0.0.0.0:{args.port}:{local_ip}:{args.port} -L 0.0.0.0:{args.http_server_port}:{local_ip}:{args.http_server_port} jehna@{local_ip}")
+        print(f"listener_add --addr 0.0.0.0:{args.port} --to 127.0.0.1:{args.port} --tcp")
+        print(f"listener_add --addr 0.0.0.0:{args.http_server_port} --to 127.0.0.1:{args.http_server_port} --tcp")
         ip = args.ip
     else:
         ip = local_ip
