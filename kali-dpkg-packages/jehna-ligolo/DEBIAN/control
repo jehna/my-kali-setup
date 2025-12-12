@@ -1,8 +1,0 @@
-Package: jehna-ligolo
-Version: 1.0-1
-Section: metapackages
-Priority: optional
-Architecture: all
-Depends: ligolo-ng
-Maintainer: Jesse Luoto <jesse.luoto@gmail.com>
-Description: Set up Ligolo-ng
